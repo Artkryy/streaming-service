@@ -1,16 +1,17 @@
-import TracksModel from "../Tracks/Model/tracks-model";
-import { Song } from "../interfaces/Song";
-import PopupService from "../utils/popup-serv";
-import { TrackPresenter } from "./TrackPresenter";
+import TracksModel from "../../Tracks/Model/tracks-model";
+import { Playlist } from "../../interfaces/Playlist";
+import { Song } from "../../interfaces/Song";
+import PopupService from "../../utils/popup-serv";
+import { TrackPresenter } from "../Track/TrackPresenter";
 
 export default class TrackListPresenter {
-  constructor(private tracksData: TracksModel) {}
+  constructor(private tracksData: TracksModel, private playlistData: Playlist) {}
 
   render(container: HTMLElement): void {
     const tracks = this.tracksData.getTracks();
     container.innerHTML = "";
     tracks.forEach((track) => {
-      const trackPresenter = new TrackPresenter(track, this.tracksData);
+      const trackPresenter = new TrackPresenter(track, this.tracksData, this.playlistData);
       trackPresenter.render(container);
     });
   }
@@ -28,6 +29,7 @@ export default class TrackListPresenter {
         const trackPresenter = new TrackPresenter(
           updatedTrackData,
           this.tracksData,
+          this.playlistData
         );
         trackPresenter.render(trackElement);
       }

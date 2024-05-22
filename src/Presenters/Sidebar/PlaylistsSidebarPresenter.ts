@@ -1,4 +1,4 @@
-import { Playlist } from "../interfaces/Playlist";
+import { Playlist } from "../../interfaces/Playlist";
 import { PlaylistsSideBarItemPresenter } from "./PlaylistsSidebarItemPresenter";
 
 export class PlaylistsSideBarPresenter {

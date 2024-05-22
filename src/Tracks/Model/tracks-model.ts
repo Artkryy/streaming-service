@@ -9,7 +9,7 @@ export enum UserAction {
 export default class TracksModel {
   private tracks: Song[] = [];
 
-  public getTracks(filter?: string): Song[] {
+  getTracks(filter?: string): Song[] {
     if (!filter) {
       return this.tracks;
     }
@@ -29,19 +29,19 @@ export default class TracksModel {
     });
   }
 
-  public addTrack(track: Song): void {
+  addTrack(track: Song): void {
     this.tracks.push(track);
   }
 
-  public updateTrack(trackId: number, updatedTrack: Song): void {
+  updateTrack(trackId: number, updatedTrack: Song): void {
     this.tracks[trackId] = updatedTrack;
   }
 
-  public removeTrack(trackId: number): void {
+  removeTrack(trackId: number) {
     this.tracks = this.tracks.filter((track) => track.id !== trackId);
   }
 
-  public handleUserAction(
+  handleUserAction(
     action: UserAction,
     trackId: number,
     track?: Song,

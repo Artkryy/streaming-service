@@ -1,3 +1,4 @@
+import { ScreenState, switchScreen } from "../..";
 import { Component } from "../../Component/component";
 import { Playlist } from "../../interfaces/Playlist";
 
@@ -19,5 +20,10 @@ export default class PlaylistItem extends Component {
 </li>`;
   }
 
-  addEventListeners(): void {}
+  addEventListeners(): void {
+    this.element?.addEventListener("click", (event: Event) => {
+      event.preventDefault()
+      switchScreen(ScreenState.Playlist, this.data.songs);
+    });
+  }
 }

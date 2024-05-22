@@ -1,10 +1,18 @@
+import { token } from "../..";
 import { Component } from "../../Component/component";
+import { addTrackForPlaylist } from "../../api/api";
 import { Playlist } from "../../interfaces/Playlist";
+import { Song } from "../../interfaces/Song";
+import playlistModalServ from "../../utils/playlist-modal-serv";
 
 export default class PlaylistModalItem extends Component {
-  constructor(private data: Playlist) {
+  constructor(
+    private data: Playlist,
+    private trackData: Song
+  ) {
     super();
     this.data = data;
+    this.trackData = trackData;
   }
 
   getTemplate(): string {
@@ -16,5 +24,12 @@ export default class PlaylistModalItem extends Component {
             `;
   }
 
-  addEventListeners(): void {}
+  addEventListeners(): void {
+    this.element?.addEventListener('click', async () => {
+      if (token) {
+        await addTrackForPlaylist(this.trackData.id, this.data.id, token)
+        playlistModalServ.closeModalForPreviousTrack()
+      }
+    })
+  }
 }

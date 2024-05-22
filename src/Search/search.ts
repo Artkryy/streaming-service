@@ -12,11 +12,10 @@ export default class Search extends Component {
   }
 
   addEventListeners(): void {
-    const input = this.element?.querySelector(".header__search__field");
-    input?.addEventListener("input", (event) => {
-      console.log('dadada');
+    this.element?.addEventListener("input", (event) => {
       const target = event.target as HTMLInputElement;
       const filter = target.value;
+      // console.log(filter);
       if (this.onSearchInputChange) {
         this.onSearchInputChange(filter);
       }

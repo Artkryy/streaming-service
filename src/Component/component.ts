@@ -1,4 +1,4 @@
-import { createElement } from "../utils";
+import { createElement } from "../utils/utils";
 
 export abstract class Component {
   protected element: HTMLElement | null = null;

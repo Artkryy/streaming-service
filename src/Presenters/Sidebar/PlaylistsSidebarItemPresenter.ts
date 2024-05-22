@@ -1,6 +1,6 @@
-import { renderComponent } from "../core/render";
-import { Playlist } from "../interfaces/Playlist";
-import PlaylistsSidebarItem from "../SideBar/playlist-sidebar-item/playlist-sidebar-item";
+import { renderComponent } from "../../core/render";
+import { Playlist } from "../../interfaces/Playlist";
+import PlaylistsSidebarItem from "../../SideBar/playlist-sidebar-item/playlist-sidebar-item";
 
 export class PlaylistsSideBarItemPresenter {
   constructor(private playlistData: Playlist) {}

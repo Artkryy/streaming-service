@@ -1,16 +1,13 @@
-import { randomPlaylists } from "..";
-import PlaylistsModel from "../Playlist/Model/playlists-model";
-import ModalPresenter from "../Presenters/ModalPresenter";
+import { token, username } from "..";
+import ModalPresenter from "../Presenters/Modal/ModalPresenter";
+import { getUserPlaylists } from "../api/api";
 import { Song } from "../interfaces/Song";
 
 class PlaylistModalService {
   private static instance: PlaylistModalService;
-  private playlistsModel: PlaylistsModel;
   currentTrack: Song | null = null;
 
-  private constructor() {
-    this.playlistsModel = new PlaylistsModel();
-  }
+  private constructor() {}
 
   public static getInstance(): PlaylistModalService {
     if (!PlaylistModalService.instance) {
@@ -19,11 +16,8 @@ class PlaylistModalService {
     return PlaylistModalService.instance;
   }
 
-  public openModalForTrack(trackData: Song): void {
-    this.closeModalForPreviousTrack()
-
-    const playlists = this.playlistsModel.fetchPlaylists()
-    console.log(playlists);
+  public async openModalForTrack(trackData: Song): Promise<void> {
+    this.closeModalForPreviousTrack();
 
     const body = document.body;
     if (body) {
@@ -44,26 +38,26 @@ class PlaylistModalService {
         modal.style.display = "block";
       }
 
-      const modalPresenter = new ModalPresenter(randomPlaylists);
-      const modalContainer = document.querySelector(
-        ".playlists-modal__playlist_content",
-      );
-      if (modalContainer instanceof HTMLElement) {
-        modalPresenter.render(modalContainer);
-      }
+      if (token && username) {
+        const playlists = await getUserPlaylists(username, token);
 
-        // document.addEventListener("click", this.handleDocumentClick);
+        const modalPresenter = new ModalPresenter(playlists, trackData);
+        const modalContainer = document.querySelector(
+          ".playlists-modal__playlist_content",
+        );
+        if (modalContainer instanceof HTMLElement) {
+          modalPresenter.render(modalContainer);
+        }
+      }
+      // document.addEventListener("click", this.handleDocumentClick);
     }
 
     this.currentTrack = trackData;
-    console.log(this.currentTrack);
-    console.log(this);
 
     const closeBtn = document.querySelector(".playlists-modal__close-btn");
-    closeBtn?.addEventListener('click', () => {
-      this.closeModalForPreviousTrack()
-    })
-
+    closeBtn?.addEventListener("click", () => {
+      this.closeModalForPreviousTrack();
+    });
   }
 
   // public handleDocumentClick = (event: MouseEvent): void => {
