@@ -50,21 +50,17 @@ export class FooterPlayerPresenter {
 
   private async loadTrack(url: string) {
     try {
-      const response = await fetch(`${API}${url}`, {
-        method: 'GET',
-        headers: {
-          "Content-Type": 'audio/mpeg'
-        }
-      });
+      const response = await fetch(`${API}${url}`);
       console.log(response);
       if (!response.ok) {
-        throw new Error('ОШИБКА!')
+        throw new Error("ОШИБКА!");
       }
       const arrayBuffer = await response.arrayBuffer();
       await this.audioContext.decodeAudioData(arrayBuffer);
-      this.audioElement.src = URL.createObjectURL(new Blob([arrayBuffer]));
+      const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
+      this.audioElement.src = URL.createObjectURL(blob);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
