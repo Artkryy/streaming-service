@@ -10,8 +10,13 @@ export class FooterPlayerPresenter {
   private model: PlayerModel;
   private view: PlayerView;
   private audioContext: AudioContext;
-  private audioElement: HTMLAudioElement;
-  private audioSource: MediaElementAudioSourceNode;
+  private gainNode: GainNode;
+  private audioBufferSource: AudioBufferSourceNode | null = null;
+  private currentBuffer: AudioBuffer | null = null;
+  private startTime: number = 0;
+  // private pauseTime: number = 0;
+  private elapsedTime: number = 0;
+  private updateTimeInterval: number | null = null;
 
   constructor(
     private trackData: Song,
@@ -22,15 +27,8 @@ export class FooterPlayerPresenter {
     this.view = view;
     this.audioContext = new (window.AudioContext ||
       (window as any).webkitAudioContext)();
-    this.audioElement = new Audio();
-    this.audioSource = this.audioContext.createMediaElementSource(
-      this.audioElement,
-    );
-    this.audioElement.addEventListener(
-      "timeupdate",
-      this.updateTime.bind(this),
-    );
-    this.audioElement.addEventListener("ended", this.nextTrack.bind(this));
+    this.gainNode = this.audioContext.createGain();
+    this.gainNode.connect(this.audioContext.destination);
     this.view.setPresenter(this);
     this.loadData(this.trackData);
   }
@@ -38,8 +36,9 @@ export class FooterPlayerPresenter {
   private async loadData(trackData: Song) {
     this.model.setTrack(trackData);
     await this.loadTrack(trackData.path);
-    this.view.update(this.model.getState());
-    console.log(this.audioSource);
+    const duration = this.currentBuffer ? this.currentBuffer.duration : 0;
+    this.model.setDuration(duration);
+    this.view.update(this.model.getState(), 0);
   }
 
   render(container: HTMLElement): void {
@@ -51,42 +50,96 @@ export class FooterPlayerPresenter {
   private async loadTrack(url: string) {
     try {
       const response = await fetch(`${API}${url}`);
-      console.log(response);
       if (!response.ok) {
         throw new Error("ОШИБКА!");
       }
       const arrayBuffer = await response.arrayBuffer();
-      await this.audioContext.decodeAudioData(arrayBuffer);
-      const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-      this.audioElement.src = URL.createObjectURL(blob);
+      this.currentBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
     } catch (error) {
       console.error(error);
     }
   }
 
+  private createAudioBufferSource(startTime: number) {
+    if (this.audioBufferSource) {
+      this.audioBufferSource.disconnect();
+      this.audioBufferSource = null;
+    }
+
+    this.audioBufferSource = this.audioContext.createBufferSource();
+    this.audioBufferSource.buffer = this.currentBuffer;
+    this.audioBufferSource.connect(this.gainNode);
+    this.audioBufferSource.start(0, startTime)
+    this.startTime = startTime;
+
+    this.audioBufferSource.addEventListener("ended", this.nextTrack.bind(this));
+  }
+
   play() {
+    if (!this.currentBuffer) {
+      console.error("No audio Buffer loaded");
+      return;
+    }
     if (this.audioContext.state === "suspended") {
       this.audioContext.resume();
     }
-    this.model.play();
-    this.audioElement.play();
-    this.view.update(this.model.getState());
+
+    this.createAudioBufferSource(this.elapsedTime);
+    // this.startTime = this.audioContext.currentTime - this.elapsedTime;
+    // this.audioBufferSource!.start(0, this.elapsedTime);
+    this.model.play(this.elapsedTime);
+    this.updateTimeInterval = window.setInterval(() => {
+      this.updateTime();
+    }, 1000);
+    this.view.update(this.model.getState(), this.elapsedTime);
   }
 
   pause() {
+    if (this.audioBufferSource) {
+      this.audioBufferSource.stop();
+      this.audioBufferSource.disconnect();
+      this.audioBufferSource = null;
+    }
+    // this.pauseTime = this.audioContext.currentTime;
+    this.elapsedTime = this.audioContext.currentTime - this.startTime;
     this.model.pause();
-    this.audioElement.pause();
-    this.view.update(this.model.getState());
+    if (this.updateTimeInterval) {
+      clearInterval(this.updateTimeInterval);
+      this.updateTimeInterval = null;
+    }
+    this.view.update(this.model.getState(), this.elapsedTime);
   }
 
   updateTime() {
-    this.model.updateTime(this.audioElement.currentTime);
-    this.view.update(this.model.getState());
+    // if (this.model.getState().isPlaying) {
+    //   this.elapsedTime = this.audioContext.currentTime - this.startTime;
+    //   this.view.update(this.model.getState(), this.elapsedTime);
+    // }
+    const currentTime = this.audioContext.currentTime;
+    this.model.updateTime(currentTime);
+    this.view.update(this.model.getState(), currentTime - this.startTime);
   }
 
   nextTrack() {
-    console.log(this.audioContext);
-    console.log("NEXT");
+    if (this.updateTimeInterval) {
+      clearInterval(this.updateTimeInterval);
+    }
+  }
+
+  setVolume(volume: number) {
+    this.gainNode.gain.value = volume;
+  }
+
+  seek(time: number) {
+    if (!this.currentBuffer) {
+      console.error("No audio Buffer Loaded");
+      return;
+    }
+
+    this.pause();
+    this.elapsedTime = time;
+    // console.log(this.elapsedTime);
+    this.play();
   }
 
   getCurrentState(): PlayerState {

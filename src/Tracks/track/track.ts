@@ -76,13 +76,10 @@ export default class Track extends Component {
       event.stopImmediatePropagation();
       console.log(this.playlistData);
       if (token && username) {
-        // const playlists: Playlist[] = await getUserPlaylists(username, token);
-        // playlists.forEach((playlist) => {
           if (token) {
             console.log(this.data, this.playlistData);
             removeTrackFromPlaylist(this.data.id, this.playlistData.id, token);
           }
-        // });
       }
       this.handleDeleteClick(this.data.id);
       this.removeElement();
@@ -96,10 +93,6 @@ export default class Track extends Component {
       event.stopImmediatePropagation()
     });
   }
-
-  // private handleTrackClick(trackData: Song) {
-  //   console.log(trackData);
-  // }
 
   private handleDeleteClick(trackId: number): void {
     this.updateTrackData.handleUserAction(UserAction.REMOVE, trackId);

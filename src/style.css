@@ -1031,6 +1031,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1;
 }
 
 .playlist__h3__link:focus-visible {
@@ -1047,6 +1048,29 @@ body {
   width: 100%;
   margin-bottom: 20px;
 }
+
+.playlist__img-add {
+  width: 100%;
+  margin-bottom: 20px;
+  filter: brightness(40%);
+}
+
+.playlist__img-btn {
+  position: absolute;
+  top: 37%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  fill: white;
+}
+
+.playlist__name {
+  position: relative;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 400;
+  z-index: 2;
+}
+
 
 .playlist__count {
   color: var(--color-greytxt);
@@ -1118,6 +1142,7 @@ body {
 }
 
 .player__range-play {
+  display: flex;
   flex: 1;
   margin-right: 12px;
 }
@@ -1142,6 +1167,34 @@ body {
 .player__value-range {
   width: 72px;
   height: 4px;
+}
+
+.error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid red;
+  transform: translate(-50%, -50%);
+}
+
+.error-title {
+  font-size: 24px;
+  color: red;
+}
+
+.clear-btn {
+  padding: 7px;
+  background-color: var(--color-promo);
+  color: white;
+}
+
+.clear-btn:hover {
+  background-color: var(--color-greytxt);
 }
 
 .player__controls .noUi-handle.noUi-handle-lower {

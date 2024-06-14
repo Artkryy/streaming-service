@@ -1,7 +1,7 @@
 import { Component } from "../../Component/component";
 
 export default class TrackList extends Component {
-  
+
   constructor() {
     super();
   }

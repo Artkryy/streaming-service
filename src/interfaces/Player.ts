@@ -4,5 +4,5 @@ export interface PlayerState {
   currentTrack: Song | null;
   isPlaying: boolean;
   currentTime: number;
-  duration: string;
+  duration: number;
 }

@@ -36,6 +36,20 @@ export const getUserPlaylists = async (username: string, token: string) => {
     .then((data) => data);
 };
 
+export const addPlaylist = async (playlistName: string, token: string) => {
+  return await fetch(`${API}/api/playlists`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ name: playlistName }),
+  })
+    .then((response) => response.json())
+    .then((data) => data);
+};
+
 export const addTrackForPlaylist = async (
   trackId: number,
   playlistId: number,
@@ -67,4 +81,38 @@ export const removeTrackFromPlaylist = async (
   })
     .then((response) => response.json())
     .then((data) => data);
+};
+
+export const login = async (username: string, password: string) => {
+  const response = await fetch(`${API}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+  return response;
+};
+
+export const register = async (
+  username: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+) => {
+  const response = await fetch(`${API}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      password,
+      firstName,
+      lastName,
+    }),
+  });
+  return response;
 };

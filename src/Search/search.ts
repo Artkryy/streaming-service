@@ -2,9 +2,11 @@ import { Component } from "../Component/component";
 
 export default class Search extends Component {
   private onSearchInputChange?: (filter: string) => void;
+  private debounce: number | undefined;
 
   constructor() {
     super();
+    this.debounce = undefined;
   }
 
   getTemplate(): string {
@@ -15,10 +17,16 @@ export default class Search extends Component {
     this.element?.addEventListener("input", (event) => {
       const target = event.target as HTMLInputElement;
       const filter = target.value;
-      // console.log(filter);
-      if (this.onSearchInputChange) {
-        this.onSearchInputChange(filter);
+
+      if (this.debounce) {
+        clearTimeout(this.debounce);
       }
+
+      this.debounce = window.setTimeout(() => {
+        if (this.onSearchInputChange) {
+          this.onSearchInputChange(filter);
+        }
+      }, 500);
     });
   }
 

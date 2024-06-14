@@ -62,7 +62,7 @@ export default class FooterPlayerControls extends Component {
       </button>
     </div>
     <div class="player__controls__footer"> <span class="player__time-start">${formatDuration(this.state.currentTime)}</span>
-      <div class="player__range-play" id="range-play"></div><span class="player__time-end">${formatDuration(Number(this.state.duration))}</span>
+      <div class="player__range-play" id="range-play"><input class='player__range-play' type='range' min='0' max='100' step='1' value='0'  /></div><span class="player__time-end">${formatDuration(Number(this.state.duration))}</span>
     </div>
   </div>
   <div class="player__value"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"
@@ -75,7 +75,7 @@ export default class FooterPlayerControls extends Component {
         d="M10.9124 5.58582C11.0981 5.77153 11.2454 5.99201 11.3459 6.23466C11.4464 6.47731 11.4981 6.73739 11.4981 7.00003C11.4981 7.26267 11.4464 7.52274 11.3459 7.7654C11.2454 8.00805 11.0981 8.22853 10.9124 8.41424"
         stroke="#AAAAAA" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
-    <div class="player__value-range" id="range-value"></div>
+    <input class='player__value-range-inp' id='range-value' type='range' min='0.01' max='1' step='0.01' defaultValue='0.5'/>
   </div>
     `;
   }

@@ -3,9 +3,14 @@ import { Component } from "../../Component/component";
 import { Playlist } from "../../interfaces/Playlist";
 
 export default class PlaylistsSidebarItem extends Component {
-  constructor(private data: Playlist) {
+  private token: string;
+  private username: string;
+
+  constructor(private data: Playlist, token: string, username: string) {
     super();
     this.data = data;
+    this.token = token
+    this.username = username
   }
 
   getTemplate(): string {
@@ -15,8 +20,8 @@ export default class PlaylistsSidebarItem extends Component {
   }
 
   addEventListeners(): void {
-    this.element?.addEventListener('click', () => {
-      switchScreen(ScreenState.Playlist, this.data.songs)
-    })
+    this.element?.addEventListener("click", () => {
+      switchScreen(ScreenState.Playlist, this.token, this.username, this.data.songs);
+    });
   }
 }

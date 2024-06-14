@@ -11,7 +11,7 @@ export default class FooterPlayer extends Component {
   constructor(private song: Song) {
     super();
     this.trackComponent = new FooterPlayerTrack(this.song);
-    this.controlsComponent = new FooterPlayerControls(new PlayerModel(this.song).getState());
+    this.controlsComponent = new FooterPlayerControls(new PlayerModel().getState());
   }
 
   getTemplate(): string {
