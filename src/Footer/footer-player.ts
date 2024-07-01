@@ -17,8 +17,8 @@ export default class FooterPlayer extends Component {
   getTemplate(): string {
     return `
     <div class="player flex">
-    ${this.trackComponent.getTemplate()}
-    ${this.controlsComponent.getTemplate()}
+      ${this.trackComponent.getTemplate()}
+      ${this.controlsComponent.getTemplate()}
     </div>`;
   }
 

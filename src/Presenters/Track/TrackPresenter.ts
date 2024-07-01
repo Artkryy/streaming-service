@@ -1,5 +1,5 @@
 import { renderComponent } from "../../core/render";
-import { Playlist } from "../../interfaces/Playlist";
+// import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
 import TracksModel from "../../Tracks/Model/tracks-model";
 import Track from "../../Tracks/track/track";
@@ -9,7 +9,7 @@ export class TrackPresenter {
   constructor(
     private trackData: Song,
     private tracksModel: TracksModel,
-    private playlistData: Playlist
+    private playlistData: Song[]
   ) {}
 
   render(container: HTMLElement): void {

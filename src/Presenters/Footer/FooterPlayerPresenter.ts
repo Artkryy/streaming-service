@@ -4,6 +4,7 @@ import FooterPlayer from "../../Footer/footer-player";
 import { PlayerModel } from "../../Footer/Model/footer-player-model";
 import { PlayerView } from "../../Footer/Model/footer-player-view";
 import { PlayerState } from "../../interfaces/Player";
+// import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
 
 export class FooterPlayerPresenter {
@@ -14,15 +15,17 @@ export class FooterPlayerPresenter {
   private audioBufferSource: AudioBufferSourceNode | null = null;
   private currentBuffer: AudioBuffer | null = null;
   private startTime: number = 0;
-  // private pauseTime: number = 0;
   private elapsedTime: number = 0;
   private updateTimeInterval: number | null = null;
+  private currentTrackIndex: number = 0;
 
   constructor(
     private trackData: Song,
+    private playlistData: Song[],
     model: PlayerModel,
     view: PlayerView,
   ) {
+    console.log(this.playlistData);
     this.model = model;
     this.view = view;
     this.audioContext = new (window.AudioContext ||
@@ -30,15 +33,18 @@ export class FooterPlayerPresenter {
     this.gainNode = this.audioContext.createGain();
     this.gainNode.connect(this.audioContext.destination);
     this.view.setPresenter(this);
+    this.model.setPlaylist(this.playlistData);
     this.loadData(this.trackData);
   }
 
-  private async loadData(trackData: Song) {
-    this.model.setTrack(trackData);
-    await this.loadTrack(trackData.path);
-    const duration = this.currentBuffer ? this.currentBuffer.duration : 0;
-    this.model.setDuration(duration);
-    this.view.update(this.model.getState(), 0);
+  private async loadData(trackData: Song | undefined) {
+    if (trackData) {
+      this.model.setTrack(trackData);
+      await this.loadTrack(trackData.path);
+      const duration = this.currentBuffer ? this.currentBuffer.duration : 0;
+      this.model.setDuration(duration);
+      this.view.update(this.model.getState(), 0);
+    }
   }
 
   render(container: HTMLElement): void {
@@ -69,7 +75,7 @@ export class FooterPlayerPresenter {
     this.audioBufferSource = this.audioContext.createBufferSource();
     this.audioBufferSource.buffer = this.currentBuffer;
     this.audioBufferSource.connect(this.gainNode);
-    this.audioBufferSource.start(0, startTime)
+    this.audioBufferSource.start(0, startTime);
     this.startTime = startTime;
 
     this.audioBufferSource.addEventListener("ended", this.nextTrack.bind(this));
@@ -85,8 +91,6 @@ export class FooterPlayerPresenter {
     }
 
     this.createAudioBufferSource(this.elapsedTime);
-    // this.startTime = this.audioContext.currentTime - this.elapsedTime;
-    // this.audioBufferSource!.start(0, this.elapsedTime);
     this.model.play(this.elapsedTime);
     this.updateTimeInterval = window.setInterval(() => {
       this.updateTime();
@@ -100,7 +104,6 @@ export class FooterPlayerPresenter {
       this.audioBufferSource.disconnect();
       this.audioBufferSource = null;
     }
-    // this.pauseTime = this.audioContext.currentTime;
     this.elapsedTime = this.audioContext.currentTime - this.startTime;
     this.model.pause();
     if (this.updateTimeInterval) {
@@ -111,19 +114,31 @@ export class FooterPlayerPresenter {
   }
 
   updateTime() {
-    // if (this.model.getState().isPlaying) {
-    //   this.elapsedTime = this.audioContext.currentTime - this.startTime;
-    //   this.view.update(this.model.getState(), this.elapsedTime);
-    // }
     const currentTime = this.audioContext.currentTime;
     this.model.updateTime(currentTime);
     this.view.update(this.model.getState(), currentTime - this.startTime);
   }
 
-  nextTrack() {
+  async nextTrack() {
     if (this.updateTimeInterval) {
       clearInterval(this.updateTimeInterval);
     }
+    this.currentTrackIndex =
+      (this.currentTrackIndex + 1) % this.playlistData.length;
+    const nextTrack = this.playlistData[this.currentTrackIndex];
+    await this.loadData(nextTrack);
+    this.play();
+  }
+
+  async prevTrack() {
+    if (this.updateTimeInterval) {
+      clearInterval(this.updateTimeInterval);
+    }
+    this.currentTrackIndex =
+      (this.currentTrackIndex - 1 + this.playlistData.length) % this.playlistData.length;
+    const previousTrack = this.playlistData[this.currentTrackIndex];
+    await this.loadData(previousTrack);
+    this.play();
   }
 
   setVolume(volume: number) {
@@ -138,7 +153,6 @@ export class FooterPlayerPresenter {
 
     this.pause();
     this.elapsedTime = time;
-    // console.log(this.elapsedTime);
     this.play();
   }
 

@@ -28,7 +28,7 @@ class PlaylistModalService {
         <div class="playlists-modal__title">Добавить в плейлист</div>
         <div class="playlists-modal__playlist_content"></div>
         <div class="playlists-modal__footer">
-            <div class="playlists-modal__close-btn">Отменить</div>
+          <div class="playlists-modal__close-btn">Отменить</div>
         </div>
       </div>
       `,
@@ -49,7 +49,6 @@ class PlaylistModalService {
           modalPresenter.render(modalContainer);
         }
       }
-      // document.addEventListener("click", this.handleDocumentClick);
     }
 
     this.currentTrack = trackData;
@@ -59,15 +58,6 @@ class PlaylistModalService {
       this.closeModalForPreviousTrack();
     });
   }
-
-  // public handleDocumentClick = (event: MouseEvent): void => {
-  //   const clickedDrop = (event.target as HTMLElement).closest(
-  //     ".playlists-modal",
-  //   );
-  //   if (!clickedDrop) {
-  //     this.closeModalForPreviousTrack();
-  //   }
-  // };
 
   public closeModalForPreviousTrack(): void {
     if (this.currentTrack) {

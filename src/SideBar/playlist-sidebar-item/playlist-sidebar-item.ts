@@ -14,9 +14,11 @@ export default class PlaylistsSidebarItem extends Component {
   }
 
   getTemplate(): string {
-    return `<li class="aside__item">
-              <button class="aside__btn">${this.data.name}</button>
-            </li>`;
+    return `
+    <li class="aside__item">
+      <button class="aside__btn">${this.data.name}</button>
+    </li>
+    `;
   }
 
   addEventListeners(): void {

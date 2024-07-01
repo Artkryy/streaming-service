@@ -7,7 +7,6 @@ import TrackList from "./Tracks/track-list/track-list";
 import TrackListPresenter from "./Presenters/TrackList/TrackListPresenter";
 
 import { renderComponent } from "./core/render";
-import { PlaylistListPresenter } from "./Presenters/Playlist/PlaylistsListPresenter";
 import { PlaylistsSideBarPresenter } from "./Presenters/Sidebar/PlaylistsSidebarPresenter";
 import { FooterPlayerPresenter } from "./Presenters/Footer/FooterPlayerPresenter";
 
@@ -35,7 +34,7 @@ const footer = document.querySelector(".footer");
 const search = document.querySelector(".header__search");
 
 export enum ScreenState {
-  PlaylistList = "PlaylistList",
+  UserPlaylist = "UserPlaylist",
   Tracks = "Tracks",
   Playlist = "Playlist",
 }
@@ -152,7 +151,11 @@ export const renderSidebar = async (token: string, username: string) => {
     asideList.addEventListeners();
   }
 
-  const asideListPresenter = new PlaylistsSideBarPresenter(playlists, token, username);
+  const asideListPresenter = new PlaylistsSideBarPresenter(
+    playlists,
+    token,
+    username,
+  );
   const asideListContainer = document.querySelector(".aside__list");
   if (asideListContainer instanceof HTMLElement) {
     asideListPresenter.render(asideListContainer);
@@ -160,37 +163,20 @@ export const renderSidebar = async (token: string, username: string) => {
 };
 
 export const renderTrackList = async (tracks: Song[], token: string) => {
-  const trackList = new TrackList();
+  const trackList = new TrackList(tracks, token);
   if (main instanceof HTMLElement) {
     main.innerHTML = "";
     renderComponent(trackList, main);
   }
-
-  const tracksModel = new TracksModel();
-  tracks.forEach((track) => tracksModel.addTrack(track));
-
-  const playlists: Playlist[] = await getTracks(token);
-  playlists.forEach((playlist) => {
-    const trackListPresenter = new TrackListPresenter(tracksModel, playlist);
-    const tracklistContainer = document.querySelector(".tracks__list");
-    if (tracklistContainer instanceof HTMLElement) {
-      tracklistContainer.innerHTML = "";
-      trackListPresenter.render(tracklistContainer);
-    }
-  });
 };
 
-export const renderPlaylistList = async (token: string) => {
+export const renderUserPlaylist = async (token: string) => {
   const allPlaylists = await getAllPlaylists(token);
 
-  const playlistsList = new PlaylistList();
+  const playlistsList = new PlaylistList(allPlaylists);
   if (main instanceof HTMLElement) {
     renderComponent(playlistsList, main);
-  }
-  const playlistListPresenter = new PlaylistListPresenter(allPlaylists);
-  const playlistListContainer = document.querySelector(".playlist__list");
-  if (playlistListContainer instanceof HTMLElement) {
-    playlistListPresenter.render(playlistListContainer);
+    playlistsList.addPlaylists();
   }
 };
 
@@ -199,7 +185,7 @@ export const renderPlaylist = async (
   token: string,
   username: string,
 ) => {
-  const trackList = new TrackList();
+  const trackList = new TrackList(playlist, token);
   if (main instanceof HTMLElement) {
     renderComponent(trackList, main);
   }
@@ -210,19 +196,25 @@ export const renderPlaylist = async (
   const playlists: Playlist[] = await getUserPlaylists(username, token);
 
   playlists.forEach((playlist) => {
-    const trackListPresenter = new TrackListPresenter(trackListModel, playlist);
-    const tracklistContainer = document.querySelector(".tracks__list");
-    if (tracklistContainer instanceof HTMLElement) {
-      trackListPresenter.render(tracklistContainer);
+    if (playlist.songs) {
+      const trackListPresenter = new TrackListPresenter(
+        trackListModel,
+        playlist.songs,
+      );
+      const tracklistContainer = document.querySelector(".tracks__list");
+      if (tracklistContainer instanceof HTMLElement) {
+        trackListPresenter.render(tracklistContainer);
+      }
     }
   });
 };
 
-export const renderFooterPlayer = (trackData: Song) => {
+export const renderFooterPlayer = (trackData: Song, playlistData: Song[]) => {
   const model = new PlayerModel();
   const view = new PlayerView();
   const footerPlayerPresenter = new FooterPlayerPresenter(
     trackData,
+    playlistData,
     model,
     view,
   );
@@ -241,8 +233,8 @@ export const switchScreen = async (
 ) => {
   clearMainContent();
   switch (screenState) {
-    case ScreenState.PlaylistList:
-      renderPlaylistList(token);
+    case ScreenState.UserPlaylist:
+      renderUserPlaylist(token);
       break;
     case ScreenState.Tracks:
       const tracks = await getTracks(token);

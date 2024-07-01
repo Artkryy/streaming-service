@@ -18,10 +18,12 @@ export class PopupService {
     if (trackContainer) {
       trackContainer.insertAdjacentHTML(
         "beforeend",
-        `<div class="track__dropdown">
-      <button class="track__add-btn">Добавить в плейлист</button>
-      <button class="track__delete-btn">Удалить из плейлиста</button>
-    </div>`,
+        `
+        <div class="track__dropdown">
+          <button class="track__add-btn">Добавить в плейлист</button>
+          <button class="track__delete-btn">Удалить из плейлиста</button>
+        </div>
+        `,
       );
       const popup = trackContainer?.querySelector(".track__dropdown");
       popup?.classList.add("dropdown--active");

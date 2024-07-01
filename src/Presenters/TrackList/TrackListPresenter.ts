@@ -1,11 +1,11 @@
 import TracksModel from "../../Tracks/Model/tracks-model";
-import { Playlist } from "../../interfaces/Playlist";
+// import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
 import PopupService from "../../utils/popup-serv";
 import { TrackPresenter } from "../Track/TrackPresenter";
 
 export default class TrackListPresenter {
-  constructor(private tracksData: TracksModel, private playlistData: Playlist) {}
+  constructor(private tracksData: TracksModel, private playlistData: Song[]) {}
 
   render(container: HTMLElement): void {
     const tracks = this.tracksData.getTracks();

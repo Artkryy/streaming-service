@@ -10,7 +10,9 @@ export default class Search extends Component {
   }
 
   getTemplate(): string {
-    return `<input class="header__search__field" type="search" placeholder="ЧТО БУДЕМ ИСКАТЬ?">`;
+    return `
+    <input class="header__search__field" type="search" placeholder="ЧТО БУДЕМ ИСКАТЬ?">
+    `;
   }
 
   addEventListeners(): void {

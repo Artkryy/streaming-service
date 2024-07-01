@@ -15,7 +15,7 @@ export class PlayerView {
     const trackAlbum = document.querySelector(".player__track__author");
     const playBtn = document.querySelector(".player__play-btn");
     const progressBar = document.querySelector(
-      ".player__range-play",
+      "input.player__range-play",
     ) as HTMLInputElement;
     const currentTime = document.querySelector(".player__time-start");
     const duration = document.querySelector(".player__time-end");
@@ -64,11 +64,13 @@ export class PlayerView {
 
   setupEventListeners() {
     const playBtn = document.querySelector(".player__play-btn");
+    const nextBtn = document.querySelector('.player__skipnext-btn')
+    const prevBtn = document.querySelector('.player__skipback-btn')
     const volumeSlider = document.querySelector(
       ".player__value-range-inp",
     ) as HTMLInputElement;
     const progressBar = document.querySelector(
-      ".player__range-play",
+      "input.player__range-play",
     ) as HTMLInputElement;
 
     if (playBtn) {
@@ -82,6 +84,22 @@ export class PlayerView {
           }
         }
       });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (this.presenter) {
+          this.presenter.nextTrack()
+        }
+      })
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (this.presenter) {
+          this.presenter.prevTrack()
+        }
+      })
     }
 
     if (volumeSlider) {

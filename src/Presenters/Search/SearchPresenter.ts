@@ -35,6 +35,7 @@ export default class SearchPresenter {
       const filteredTracks = this.tracksModel.getTracks(filter);
       if (main instanceof HTMLElement && token) {
         renderTrackList(filteredTracks, token);
+        console.log(filteredTracks);
       }
     }
 

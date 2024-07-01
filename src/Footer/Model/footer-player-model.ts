@@ -1,24 +1,16 @@
 import { PlayerState } from "../../interfaces/Player";
 import { Song } from "../../interfaces/Song";
-// import { formatDuration } from "../../utils/utils";
 
 export class PlayerModel {
   private state: PlayerState = {
     isPlaying: false,
     currentTrack: null,
     currentTime: 0,
-    duration: 0
-  }
+    duration: 0,
+  };
 
-  // constructor(track: Song) {
-  //   this.state = {
-  //     currentTrack: track,
-  //     isPlaying: false,
-  //     currentTime: 0,
-  //     duration: `${track.duration}`,
-  //   };
-  //   track = track
-  // }
+  private playlist: Song[] = [];
+  private currentTrackIndex: number = 0;
 
   getState() {
     return this.state;
@@ -28,9 +20,15 @@ export class PlayerModel {
     this.state = newState;
   }
 
-  setTrack(track: Song): void {
-    this.state.currentTrack = track;
-    this.state.duration = track.duration;
+  setPlaylist(playlist: Song[]): void {
+    this.playlist = playlist;
+  }
+
+  setTrack(track: Song | undefined): void {
+    if (track) {
+      this.state.currentTrack = track;
+      this.state.duration = track.duration;
+    }
   }
 
   setDuration(duration: number): void {
@@ -52,4 +50,20 @@ export class PlayerModel {
     }
   }
 
+  nextTrack(): void {
+    if (this.playlist.length > 0) {
+      this.currentTrackIndex =
+        (this.currentTrackIndex + 1) % this.playlist.length;
+      this.setTrack(this.playlist[this.currentTrackIndex]);
+    }
+  }
+
+  prevTrack(): void {
+    if (this.playlist.length > 0) {
+      this.currentTrackIndex =
+        (this.currentTrackIndex - 1 + this.playlist.length) %
+        this.playlist.length;
+      this.setTrack(this.playlist[this.currentTrackIndex]);
+    }
+  }
 }
