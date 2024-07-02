@@ -10,7 +10,6 @@ import { login, register } from "../api/api";
 export default class AuthModal extends Component {
   constructor() {
     super();
-    this.setupEventListeners();
   }
 
   getTemplate(): string {
@@ -47,20 +46,16 @@ export default class AuthModal extends Component {
     `;
   }
 
-  setLoginMode() {
-    const modalTitle = document.getElementById("modal-title") as HTMLElement;
-    const loginBtn = document.getElementById("login-button") as HTMLElement;
-    const firstNameField = document.querySelector("firstName") as HTMLElement;
-    const firstNameInp = document.getElementById(
-      "firstname",
-    ) as HTMLInputElement;
-    const lastNameField = document.querySelector(".lastName") as HTMLElement;
-    const lastNameInp = document.getElementById("lastname") as HTMLInputElement;
-    const registerBtn = document.getElementById(
-      "register-button",
-    ) as HTMLElement;
-    const submitBtn = document.getElementById("submit-button") as HTMLElement;
-
+  setLoginMode(
+    modalTitle: HTMLElement,
+    loginBtn: HTMLElement,
+    registerBtn: HTMLElement,
+    firstNameField: HTMLElement,
+    firstNameInp: HTMLInputElement,
+    lastNameField: HTMLElement,
+    lastNameInp: HTMLInputElement,
+    submitBtn: HTMLElement,
+  ) {
     modalTitle.textContent = "Войти";
     loginBtn.classList.add("active");
     firstNameField.style.display = "none";
@@ -71,16 +66,16 @@ export default class AuthModal extends Component {
     submitBtn.textContent = "Войти";
   }
 
-  setRegisterMode() {
-    const modalTitle = document.getElementById("") as HTMLElement;
-    const loginBtn = document.getElementById("") as HTMLElement;
-    const registerBtn = document.getElementById("") as HTMLElement;
-    const firstNameField = document.getElementById("") as HTMLElement;
-    const firstNameInp = document.getElementById("") as HTMLInputElement;
-    const lastNameField = document.getElementById("") as HTMLElement;
-    const lastNameInp = document.getElementById("") as HTMLInputElement;
-    const submitBtn = document.getElementById("") as HTMLElement;
-
+  setRegisterMode(
+    modalTitle: HTMLElement,
+    loginBtn: HTMLElement,
+    registerBtn: HTMLElement,
+    firstNameField: HTMLElement,
+    firstNameInp: HTMLInputElement,
+    lastNameField: HTMLElement,
+    lastNameInp: HTMLInputElement,
+    submitBtn: HTMLElement,
+  ) {
     modalTitle.textContent = "Зарегистрироваться";
     loginBtn.classList.remove("active");
     registerBtn.classList.add("active");
@@ -121,7 +116,29 @@ export default class AuthModal extends Component {
     localStorage.setItem("username", username);
     localStorage.setItem("access_token", token);
 
-    this.setLoginMode();
+    const modalTitle = document.getElementById("modal-title") as HTMLElement;
+    const loginBtn = document.getElementById("login-button") as HTMLElement;
+    const registerBtn = document.getElementById(
+      "register-button",
+    ) as HTMLElement;
+    const firstNameField = document.querySelector(".firstName") as HTMLElement;
+    const firstNameInp = document.getElementById(
+      "firstname",
+    ) as HTMLInputElement;
+    const lastNameField = document.querySelector(".lastName") as HTMLElement;
+    const lastNameInp = document.getElementById("lastname") as HTMLInputElement;
+    const submitBtn = document.getElementById("submit-button") as HTMLElement;
+
+    this.setLoginMode(
+      modalTitle,
+      loginBtn,
+      registerBtn,
+      firstNameField,
+      firstNameInp,
+      lastNameField,
+      lastNameInp,
+      submitBtn,
+    );
   }
 
   async handleSubmit(event: Event) {
@@ -149,20 +166,60 @@ export default class AuthModal extends Component {
     }
   }
 
-  private setupEventListeners(): void {
+  addEventListeners(): void {
     const loginBtn = document.getElementById("login-button") as HTMLElement;
     const registerBtn = document.getElementById(
       "register-button",
     ) as HTMLElement;
+    const modalTitle = document.getElementById("modal-title") as HTMLElement;
+    const firstNameField = document.querySelector(".firstName") as HTMLElement;
+    const firstNameInp = document.getElementById(
+      "firstname",
+    ) as HTMLInputElement;
+    const lastNameField = document.querySelector(".lastName") as HTMLElement;
+    const lastNameInp = document.getElementById("lastname") as HTMLInputElement;
+    const submitBtn = document.getElementById("submit-button") as HTMLElement;
     const authForm = document.getElementById("auth-form") as HTMLElement;
 
-    registerBtn.addEventListener("click", () => this.setRegisterMode());
-    loginBtn.addEventListener("click", () => this.setLoginMode());
+    loginBtn.addEventListener("click", () => {
+      this.setLoginMode(
+        modalTitle,
+        loginBtn,
+        registerBtn,
+        firstNameField,
+        firstNameInp,
+        lastNameField,
+        lastNameInp,
+        submitBtn,
+      );
+    });
+
+    registerBtn.addEventListener("click", () => {
+      this.setRegisterMode(
+        modalTitle,
+        loginBtn,
+        registerBtn,
+        firstNameField,
+        firstNameInp,
+        lastNameField,
+        lastNameInp,
+        submitBtn,
+      );
+    });
+
     authForm.addEventListener("submit", (event: Event) =>
       this.handleSubmit(event),
     );
-    this.setLoginMode();
-  }
 
-  addEventListeners(): void {}
+    this.setLoginMode(
+      modalTitle,
+      loginBtn,
+      registerBtn,
+      firstNameField,
+      firstNameInp,
+      lastNameField,
+      lastNameInp,
+      submitBtn,
+    );
+  }
 }
