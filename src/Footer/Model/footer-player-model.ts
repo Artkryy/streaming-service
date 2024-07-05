@@ -55,6 +55,7 @@ export class PlayerModel {
       this.currentTrackIndex =
         (this.currentTrackIndex + 1) % this.playlist.length;
       this.setTrack(this.playlist[this.currentTrackIndex]);
+      this.state.currentTime = 0;
     }
   }
 
@@ -64,6 +65,11 @@ export class PlayerModel {
         (this.currentTrackIndex - 1 + this.playlist.length) %
         this.playlist.length;
       this.setTrack(this.playlist[this.currentTrackIndex]);
+      this.state.currentTime = 0;
     }
+  }
+
+  seek(time: number): void {
+    this.state.currentTime = time;
   }
 }

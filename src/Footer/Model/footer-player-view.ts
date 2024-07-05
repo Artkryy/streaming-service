@@ -115,6 +115,7 @@ export class PlayerView {
       progressBar.addEventListener("input", () => {
         if (this.presenter) {
           const time = parseFloat(progressBar.value);
+          console.log(time);
           this.presenter.seek(time);
         }
       });

@@ -4,7 +4,6 @@ import FooterPlayer from "../../Footer/footer-player";
 import { PlayerModel } from "../../Footer/Model/footer-player-model";
 import { PlayerView } from "../../Footer/Model/footer-player-view";
 import { PlayerState } from "../../interfaces/Player";
-// import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
 
 export class FooterPlayerPresenter {
@@ -25,7 +24,6 @@ export class FooterPlayerPresenter {
     model: PlayerModel,
     view: PlayerView,
   ) {
-    console.log(this.playlistData);
     this.model = model;
     this.view = view;
     this.audioContext = new (window.AudioContext ||
@@ -67,18 +65,13 @@ export class FooterPlayerPresenter {
   }
 
   private createAudioBufferSource(startTime: number) {
-    if (this.audioBufferSource) {
-      this.audioBufferSource.disconnect();
-      this.audioBufferSource = null;
-    }
-
     this.audioBufferSource = this.audioContext.createBufferSource();
     this.audioBufferSource.buffer = this.currentBuffer;
     this.audioBufferSource.connect(this.gainNode);
     this.audioBufferSource.start(0, startTime);
-    this.startTime = startTime;
+    this.startTime = this.audioContext.currentTime - startTime;
 
-    this.audioBufferSource.addEventListener("ended", this.nextTrack.bind(this));
+    this.audioBufferSource.addEventListener("ended", () => this.nextTrack());
   }
 
   play() {
@@ -89,7 +82,6 @@ export class FooterPlayerPresenter {
     if (this.audioContext.state === "suspended") {
       this.audioContext.resume();
     }
-
     this.createAudioBufferSource(this.elapsedTime);
     this.model.play(this.elapsedTime);
     this.updateTimeInterval = window.setInterval(() => {
@@ -103,31 +95,35 @@ export class FooterPlayerPresenter {
       this.audioBufferSource.stop();
       this.audioBufferSource.disconnect();
       this.audioBufferSource = null;
+      this.elapsedTime = this.audioContext.currentTime - this.startTime;
+      this.model.pause();
+      if (this.updateTimeInterval) {
+        clearInterval(this.updateTimeInterval);
+        this.updateTimeInterval = null;
+      }
+      this.view.update(this.model.getState(), this.elapsedTime);
     }
-    this.elapsedTime = this.audioContext.currentTime - this.startTime;
-    this.model.pause();
-    if (this.updateTimeInterval) {
-      clearInterval(this.updateTimeInterval);
-      this.updateTimeInterval = null;
-    }
-    this.view.update(this.model.getState(), this.elapsedTime);
   }
 
   updateTime() {
     const currentTime = this.audioContext.currentTime;
-    this.model.updateTime(currentTime);
+    this.model.updateTime(currentTime - this.startTime);
     this.view.update(this.model.getState(), currentTime - this.startTime);
   }
 
   async nextTrack() {
     if (this.updateTimeInterval) {
       clearInterval(this.updateTimeInterval);
+      this.pause();
     }
     this.currentTrackIndex =
       (this.currentTrackIndex + 1) % this.playlistData.length;
     const nextTrack = this.playlistData[this.currentTrackIndex];
     await this.loadData(nextTrack);
-    this.play();
+    this.elapsedTime = 0;
+    if (this.model.getState().isPlaying) {
+      this.play();
+    }
   }
 
   async prevTrack() {
@@ -138,7 +134,10 @@ export class FooterPlayerPresenter {
       (this.currentTrackIndex - 1 + this.playlistData.length) % this.playlistData.length;
     const previousTrack = this.playlistData[this.currentTrackIndex];
     await this.loadData(previousTrack);
-    this.play();
+    this.elapsedTime = 0;
+    if (this.model.getState().isPlaying) {
+      this.play();
+    }
   }
 
   setVolume(volume: number) {
@@ -146,14 +145,26 @@ export class FooterPlayerPresenter {
   }
 
   seek(time: number) {
+    // if (this.audioBufferSource) {
+    //   this.audioBufferSource.stop();
+    //   this.audioBufferSource.disconnect();
+    //   this.elapsedTime = time;
+    //   this.createAudioBufferSource(this.elapsedTime);
+    //   this.model.seek(time);
+    //   this.view.update(this.model.getState(), this.elapsedTime)
+    // }
     if (!this.currentBuffer) {
       console.error("No audio Buffer Loaded");
       return;
     }
-
+    const wasPlaying = this.model.getState().isPlaying;
     this.pause();
-    this.elapsedTime = time;
-    this.play();
+    this.elapsedTime = Math.max(0, Math.min(time, this.currentBuffer.duration));
+    if (wasPlaying) {
+      this.play();
+    } else {
+      this.view.update(this.model.getState(), this.elapsedTime)
+    }
   }
 
   getCurrentState(): PlayerState {
