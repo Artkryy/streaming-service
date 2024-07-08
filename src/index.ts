@@ -13,9 +13,13 @@ import { FooterPlayerPresenter } from "./Presenters/Footer/FooterPlayerPresenter
 import "./style.css";
 import TracksModel from "./Tracks/Model/tracks-model";
 import { UserPresenter } from "./Presenters/User/UserPresenter";
-import { User } from "./interfaces/User";
 import { AuthModalPresenter } from "./Presenters/AuthModal/AuthModalPresenter";
-import { getUserPlaylists, getTracks, getAllPlaylists } from "./api/api";
+import {
+  getUserPlaylists,
+  getTracks,
+  getAllPlaylists,
+  getUsers,
+} from "./api/api";
 import { PlayerModel } from "./Footer/Model/footer-player-model";
 import { PlayerView } from "./Footer/Model/footer-player-view";
 import SearchPresenter from "./Presenters/Search/SearchPresenter";
@@ -38,18 +42,6 @@ export enum ScreenState {
   Tracks = "Tracks",
   Playlist = "Playlist",
 }
-
-// MOCKS //
-const mockUserData: User = {
-  id: 1,
-  username: "ArtKry",
-  firstName: "Artem",
-  lastName: "Kryakvin",
-  albumLikes: [],
-  artistLikes: [],
-  playlists: [],
-  songLikes: [],
-};
 
 export const renderAuthModal = () => {
   const authModal = new AuthModalPresenter();
@@ -92,6 +84,8 @@ export const validateToken = (
 
 export const fetchTracks = async () => (token ? await getTracks(token) : []);
 
+export const fetchUsers = async () => (token ? await getUsers(token) : []);
+
 export const fetchPlaylists = async () =>
   token ? await getAllPlaylists(token) : [];
 
@@ -130,7 +124,7 @@ export const renderHeaderContent = async (token: string) => {
     searchPresenter.render(search);
   }
 
-  const user = new UserPresenter(mockUserData);
+  const user = new UserPresenter();
   if (header instanceof HTMLElement) {
     user.render(header);
   }
@@ -163,10 +157,14 @@ export const renderSidebar = async (token: string, username: string) => {
 };
 
 export const renderTrackList = async (tracks: Song[], token: string) => {
-  const trackList = new TrackList(tracks, token);
-  if (main instanceof HTMLElement) {
-    main.innerHTML = "";
-    renderComponent(trackList, main);
+  const users = await fetchUsers();
+  const currentUser = users.find((user) => user.username === username);
+  if (currentUser) {
+    const trackList = new TrackList(tracks, token, currentUser);
+    if (main instanceof HTMLElement) {
+      main.innerHTML = "";
+      renderComponent(trackList, main);
+    }
   }
 };
 
@@ -185,44 +183,57 @@ export const renderPlaylist = async (
   token: string,
   username: string,
 ) => {
-  const trackList = new TrackList(playlist, token);
-  if (main instanceof HTMLElement) {
-    renderComponent(trackList, main);
-  }
-
-  const trackListModel = new TracksModel();
-  playlist.forEach((track) => trackListModel.addTrack(track));
-
-  const playlists: Playlist[] = await getUserPlaylists(username, token);
-
-  playlists.forEach((playlist) => {
-    if (playlist.songs) {
-      const trackListPresenter = new TrackListPresenter(
-        trackListModel,
-        playlist.songs,
-      );
-      const tracklistContainer = document.querySelector(".tracks__list");
-      if (tracklistContainer instanceof HTMLElement) {
-        trackListPresenter.render(tracklistContainer);
-      }
+  const users = await fetchUsers();
+  const currentUser = users.find((user) => user.username === username);
+  if (currentUser) {
+    const trackList = new TrackList(playlist, token, currentUser);
+    if (main instanceof HTMLElement) {
+      renderComponent(trackList, main);
     }
-  });
+
+    const trackListModel = new TracksModel();
+    playlist.forEach((track) => trackListModel.addTrack(track));
+
+    const playlists: Playlist[] = await getUserPlaylists(username, token);
+
+    playlists.forEach((playlist) => {
+      if (playlist.songs) {
+        const trackListPresenter = new TrackListPresenter(
+          trackListModel,
+          playlist.songs,
+          currentUser,
+        );
+        const tracklistContainer = document.querySelector(".tracks__list");
+        if (tracklistContainer instanceof HTMLElement) {
+          trackListPresenter.render(tracklistContainer);
+        }
+      }
+    });
+  }
 };
 
-export const renderFooterPlayer = (trackData: Song, playlistData: Song[]) => {
-  const model = new PlayerModel();
-  const view = new PlayerView();
-  const footerPlayerPresenter = new FooterPlayerPresenter(
-    trackData,
-    playlistData,
-    model,
-    view,
-  );
-  if (footer instanceof HTMLElement) {
-    footer.innerHTML = "";
-    footerPlayerPresenter.render(footer);
+export const renderFooterPlayer = async (
+  trackData: Song,
+  playlistData: Song[],
+) => {
+  const users = await fetchUsers();
+  const currentUser = users.find((user) => user.username === username);
+  if (currentUser) {
+    const model = new PlayerModel();
+    const view = new PlayerView();
+    const footerPlayerPresenter = new FooterPlayerPresenter(
+      trackData,
+      playlistData,
+      currentUser,
+      model,
+      view,
+    );
+    if (footer instanceof HTMLElement) {
+      footer.innerHTML = "";
+      footerPlayerPresenter.render(footer);
+    }
+    view.setupEventListeners();
   }
-  view.setupEventListeners();
 };
 
 export const switchScreen = async (

@@ -5,6 +5,7 @@ import { PlayerModel } from "../../Footer/Model/footer-player-model";
 import { PlayerView } from "../../Footer/Model/footer-player-view";
 import { PlayerState } from "../../interfaces/Player";
 import { Song } from "../../interfaces/Song";
+import { User } from "../../interfaces/User";
 
 export class FooterPlayerPresenter {
   private model: PlayerModel;
@@ -17,10 +18,12 @@ export class FooterPlayerPresenter {
   private elapsedTime: number = 0;
   private updateTimeInterval: number | null = null;
   private currentTrackIndex: number = 0;
+  private repeatEnabled: boolean = false;
 
   constructor(
     private trackData: Song,
     private playlistData: Song[],
+    private user: User,
     model: PlayerModel,
     view: PlayerView,
   ) {
@@ -46,7 +49,7 @@ export class FooterPlayerPresenter {
   }
 
   render(container: HTMLElement): void {
-    const trackComponent = new FooterPlayer(this.trackData);
+    const trackComponent = new FooterPlayer(this.trackData, this.user);
     renderComponent(trackComponent, container);
     trackComponent.addEventListeners();
   }
@@ -71,7 +74,13 @@ export class FooterPlayerPresenter {
     this.audioBufferSource.start(0, startTime);
     this.startTime = this.audioContext.currentTime - startTime;
 
-    this.audioBufferSource.addEventListener("ended", () => this.nextTrack());
+    this.audioBufferSource.addEventListener("ended", () => {
+      if (this.repeatEnabled) {
+        this.repeatTrack();
+      } else {
+        this.nextTrack();
+      }
+    });
   }
 
   play() {
@@ -92,7 +101,6 @@ export class FooterPlayerPresenter {
 
   pause() {
     if (this.audioBufferSource) {
-      this.audioBufferSource.stop();
       this.audioBufferSource.disconnect();
       this.audioBufferSource = null;
       this.elapsedTime = this.audioContext.currentTime - this.startTime;
@@ -131,7 +139,8 @@ export class FooterPlayerPresenter {
       clearInterval(this.updateTimeInterval);
     }
     this.currentTrackIndex =
-      (this.currentTrackIndex - 1 + this.playlistData.length) % this.playlistData.length;
+      (this.currentTrackIndex - 1 + this.playlistData.length) %
+      this.playlistData.length;
     const previousTrack = this.playlistData[this.currentTrackIndex];
     await this.loadData(previousTrack);
     this.elapsedTime = 0;
@@ -145,14 +154,6 @@ export class FooterPlayerPresenter {
   }
 
   seek(time: number) {
-    // if (this.audioBufferSource) {
-    //   this.audioBufferSource.stop();
-    //   this.audioBufferSource.disconnect();
-    //   this.elapsedTime = time;
-    //   this.createAudioBufferSource(this.elapsedTime);
-    //   this.model.seek(time);
-    //   this.view.update(this.model.getState(), this.elapsedTime)
-    // }
     if (!this.currentBuffer) {
       console.error("No audio Buffer Loaded");
       return;
@@ -163,8 +164,32 @@ export class FooterPlayerPresenter {
     if (wasPlaying) {
       this.play();
     } else {
-      this.view.update(this.model.getState(), this.elapsedTime)
+      this.view.update(this.model.getState(), this.elapsedTime);
     }
+  }
+
+  shufflePlaylist() {
+    if (this.playlistData) {
+      const shufflePlaylistData = [...this.playlistData];
+      for (let i = shufflePlaylistData.length; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp: Song = this.playlistData[i] as Song;
+        this.playlistData[i] = this.playlistData[j] as Song;
+        this.playlistData[j] = temp as Song;
+      }
+      this.model.setPlaylist([...this.playlistData]);
+      this.currentTrackIndex = 0;
+    }
+  }
+
+  repeatTrack() {
+    this.elapsedTime = 0;
+    this.play();
+  }
+
+  toogleRepeat() {
+    this.repeatEnabled = !this.repeatEnabled;
+    console.log(this.repeatEnabled);
   }
 
   getCurrentState(): PlayerState {

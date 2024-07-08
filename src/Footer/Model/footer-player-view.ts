@@ -72,6 +72,8 @@ export class PlayerView {
     const progressBar = document.querySelector(
       "input.player__range-play",
     ) as HTMLInputElement;
+    const shuffleBtn = document.querySelector('.player__shaffle-btn');
+    const repeatBtn = document.querySelector('.player__repeat-btn')
 
     if (playBtn) {
       playBtn.addEventListener("click", () => {
@@ -115,10 +117,25 @@ export class PlayerView {
       progressBar.addEventListener("input", () => {
         if (this.presenter) {
           const time = parseFloat(progressBar.value);
-          console.log(time);
           this.presenter.seek(time);
         }
       });
+    }
+
+    if (shuffleBtn) {
+      shuffleBtn.addEventListener('click', () => {
+        if (this.presenter) {
+          this.presenter.shufflePlaylist();
+        }
+      })
+    }
+
+    if (repeatBtn) {
+      repeatBtn.addEventListener('click', () => {
+        if (this.presenter) {
+          this.presenter.toogleRepeat();
+        }
+      })
     }
   }
 }

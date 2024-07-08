@@ -1,12 +1,11 @@
 import UserComponent from "../../User/user";
 import { renderComponent } from "../../core/render";
-import { User } from "../../interfaces/User";
 
 export class UserPresenter {
-  constructor(private userData: User) {}
+  constructor() {}
 
   render(container: HTMLElement): void {
-    const trackComponent = new UserComponent(this.userData);
+    const trackComponent = new UserComponent();
     renderComponent(trackComponent, container);
     trackComponent.addEventListeners();
   }

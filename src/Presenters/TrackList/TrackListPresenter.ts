@@ -1,17 +1,27 @@
 import TracksModel from "../../Tracks/Model/tracks-model";
 // import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
+import { User } from "../../interfaces/User";
 import PopupService from "../../utils/popup-serv";
 import { TrackPresenter } from "../Track/TrackPresenter";
 
 export default class TrackListPresenter {
-  constructor(private tracksData: TracksModel, private playlistData: Song[]) {}
+  constructor(
+    private tracksData: TracksModel,
+    private playlistData: Song[],
+    private user: User,
+  ) {}
 
   render(container: HTMLElement): void {
     const tracks = this.tracksData.getTracks();
     container.innerHTML = "";
     tracks.forEach((track) => {
-      const trackPresenter = new TrackPresenter(track, this.tracksData, this.playlistData);
+      const trackPresenter = new TrackPresenter(
+        track,
+        this.tracksData,
+        this.playlistData,
+        this.user
+      );
       trackPresenter.render(container);
     });
   }
@@ -29,7 +39,8 @@ export default class TrackListPresenter {
         const trackPresenter = new TrackPresenter(
           updatedTrackData,
           this.tracksData,
-          this.playlistData
+          this.playlistData,
+          this.user
         );
         trackPresenter.render(trackElement);
       }

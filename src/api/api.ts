@@ -3,6 +3,7 @@ import { AuthResponse } from "../interfaces/AuthResponse";
 import { ErrorResponse } from "../interfaces/ErrorResponse";
 import { Playlist } from "../interfaces/Playlist";
 import { Song } from "../interfaces/Song";
+import { User } from "../interfaces/User";
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -131,7 +132,10 @@ export const removeTrackFromPlaylist = async (
   }
 };
 
-export const handleLikeSong = async (token: string, songId: number): Promise<Song> => {
+export const handleLikeSong = async (
+  token: string,
+  songId: number,
+): Promise<Song> => {
   try {
     const response = await fetch(`${API}/api/songs/${songId}/like`, {
       method: "POST",
@@ -139,16 +143,19 @@ export const handleLikeSong = async (token: string, songId: number): Promise<Son
         "Content-Type": "application/json",
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
-      }
+      },
     });
     return handleResponse<Song>(response);
   } catch (error) {
     console.error("Ошибка", error);
     throw error;
   }
-}
+};
 
-export const handleUnlikeSong = async (token: string, songId: number): Promise<Song> => {
+export const handleUnlikeSong = async (
+  token: string,
+  songId: number,
+): Promise<Song> => {
   try {
     const response = await fetch(`${API}/api/songs/${songId}/unlike`, {
       method: "POST",
@@ -156,14 +163,30 @@ export const handleUnlikeSong = async (token: string, songId: number): Promise<S
         "Content-Type": "application/json",
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
-      }
+      },
     });
     return handleResponse<Song>(response);
   } catch (error) {
     console.error("Ошибка", error);
     throw error;
   }
-}
+};
+
+export const getUsers = async (token: string): Promise<User[]> => {
+  try {
+    const response = await fetch(`${API}/api/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse<User[]>(response);
+  } catch (error) {
+    console.error("Ошибка загрузки треков", error);
+    throw error;
+  }
+};
 
 export const login = async (
   username: string,

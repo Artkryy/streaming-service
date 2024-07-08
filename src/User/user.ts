@@ -1,15 +1,12 @@
 import { renderAuthModal } from "..";
 import { Component } from "../Component/component";
-import { User } from "../interfaces/User";
 
 export default class UserComponent extends Component {
-  constructor(private userData: User) {
+  constructor() {
     super();
-    this.userData = userData;
   }
 
   override getTemplate(): string {
-    console.log(this.userData);
     return `
     <a class="header__user" href='/'>
       <button class="header__user">

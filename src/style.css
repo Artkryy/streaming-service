@@ -1125,6 +1125,19 @@ body {
   flex-direction: column;
 }
 
+.player__btn__like {
+  position: relative;
+  z-index: 2;
+}
+
+.player__btn__like.like-btn--active path {
+  fill: var(--color-promo);
+}
+
+.player__btn__like path {
+  fill: var(--color-greytxt);
+}
+
 .player__controls__header {
   align-self: center;
   display: flex;

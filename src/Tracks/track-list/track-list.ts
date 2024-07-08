@@ -3,12 +3,14 @@ import TrackListPresenter from "../../Presenters/TrackList/TrackListPresenter";
 import { getTracks } from "../../api/api";
 // import { Playlist } from "../../interfaces/Playlist";
 import { Song } from "../../interfaces/Song";
+import { User } from "../../interfaces/User";
 import TracksModel from "../Model/tracks-model";
 
 export default class TrackList extends Component {
   constructor(
     private tracks: Song[],
     private token: string,
+    private user: User,
   ) {
     super();
     this.addTracks();
@@ -48,7 +50,11 @@ export default class TrackList extends Component {
     this.tracks.forEach((track) => tracksModel.addTrack(track));
 
     const playlists: Song[] = await getTracks(this.token);
-    const trackListPresenter = new TrackListPresenter(tracksModel, playlists);
+    const trackListPresenter = new TrackListPresenter(
+      tracksModel,
+      playlists,
+      this.user,
+    );
     const tracklistContainer = document.querySelector(".tracks__list");
     if (tracklistContainer instanceof HTMLElement) {
       tracklistContainer.innerHTML = "";
